@@ -26,7 +26,7 @@
     self.manager.distanceFilter = kCLDistanceFilterNone;
         
     if (![CLLocationManager locationServicesEnabled]) {
-        IFPrint(@"Location services are not enabled, quitting.");
+        IFErrPrint(@"Location services are not enabled, quitting.");
         self.exitCode = 1;
         self.shouldExit = 1;
         return;
@@ -34,7 +34,7 @@
     else if (
              ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusDenied) ||
              ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusRestricted)) {
-        IFPrint(@"Location services are not authorized, quitting.");
+        IFErrPrint(@"Location services are not authorized, quitting.");
         self.exitCode = 1;
         self.shouldExit = 1;
         return;
@@ -67,15 +67,15 @@
     [self.manager stopUpdatingLocation];
     if ([error code] == kCLErrorLocationUnknown) {
         if (![self isWifiEnabled])
-            IFPrint(@"Wi-Fi is not enabled. Please enable it to gather location data");
+            IFErrPrint(@"Wi-Fi is not enabled. Please enable it to gather location data");
         else
-            IFPrint(@"Location could not be determined right now. Try again later. Check if Wi-Fi is enabled.");
+            IFErrPrint(@"Location could not be determined right now. Try again later. Check if Wi-Fi is enabled.");
     }
     else if ([error code] == kCLErrorDenied) {
-        IFPrint(@"Access to location services was denied. You may need to enable access in System Preferences.");
+        IFErrPrint(@"Access to location services was denied. You may need to enable access in System Preferences.");
     }
     else {
-        IFPrint(@"Error getting location data. %@", error);
+        IFErrPrint(@"Error getting location data. %@", error);
     }
        
     self.exitCode = 1;
@@ -89,6 +89,16 @@ void IFPrint (NSString *format, ...) {
     
     fputs([[[NSString alloc] initWithFormat:format arguments:args] UTF8String], stdout);
     fputs("\n", stdout);
+    
+    va_end(args);
+}
+
+void IFErrPrint (NSString *format, ...) {
+    va_list args;
+    va_start(args, format);
+    
+    fputs([[[NSString alloc] initWithFormat:format arguments:args] UTF8String], stderr);
+    fputs("\n", stderr);
     
     va_end(args);
 }
